@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slotchain Casino - Play on BSC</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.7.3/dist/web3.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #1a2a6c);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .logo i {
+            font-size: 2.5rem;
+            color: #f8c555;
+        }
+        
+        .logo h1 {
+            font-size: 2rem;
+            background: linear-gradient(to right, #f8c555, #ff6b6b);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .wallet-info {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .balance {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .connect-btn {
+            background: linear-gradient(to right, #f8c555, #e44d26);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .connect-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.4);
+        }
+        
+        .connect-btn:active {
+            transform: translateY(0);
+        }
+        
+        .connect-btn.connected {
+            background: linear-gradient(to right, #2ecc71, #27ae60);
+        }
+        
+        .game-container {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .slot-machine {
+            flex: 3;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+        
+        .reels {
+            display: flex;
+            justify-content: space-around;
+            margin: 30px 0;
+        }
+        
+        .reel {
+            width: 150px;
+            height: 150px;
+            background: linear-gradient(145deg, #2c3e50, #1a1a2e);
+            border: 3px solid #f8c555;
+            border-radius: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .reel-content {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.5s ease;
+        }
+        
+        .controls {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .bet-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .bet-amount {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .bet-input {
+            background: transparent;
+            border: 2px solid #f8c555;
+            border-radius: 50px;
+            color: white;
+            padding: 10px 20px;
+            font-size: 1.1rem;
+            width: 120px;
+            text-align: center;
+        }
+        
+        .spin-btn {
+            background: linear-gradient(to right, #e74c3c, #c0392b);
+            color: white;
+            border: none;
+            padding: 15px 50px;
+            border-radius: 50px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .spin-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .spin-btn:disabled {
+            background: #7f8c8d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .info-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+        }
+        
+        .panel-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #f8c555;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f8c555;
+        }
+        
+        .info-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .info-label {
+            color: #bbb;
+        }
+        
+        .info-value {
+            font-weight: bold;
+            color: #f8c555;
+        }
+        
+        .payouts {
+            margin-top: 30px;
+        }
+        
+        .payout-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+        }
+        
+        .payout-combination {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .payout-symbol {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 5px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        
+        .results {
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.6);
+            margin-top: 30px;
+        }
+        
+        .result-title {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: #f8c555;
+        }
+        
+        .result-item {
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .win {
+            border-left: 5px solid #2ecc71;
+        }
+        
+        .loss {
+            border-left: 5px solid #e74c3c;
+        }
+        
+        .win-amount {
+            color: #2ecc71;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .loss-amount {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .jackpot {
+            animation: jackpot-glow 1.5s infinite;
+            background: linear-gradient(45deg, #f8c555, #ff6b6b, #f8c555);
+            background-size: 200% 200%;
+        }
+        
+        @keyframes jackpot-glow {
+            0% { box-shadow: 0 0 10px #f8c555; }
+            50% { box-shadow: 0 0 30px #ff6b6b; }
+            100% { box-shadow: 0 0 10px #f8c555; }
+        }
+        
+        @keyframes spin {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100%); }
+        }
+        
+        .spinning {
+            animation: spin 0.5s infinite linear;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: #bbb;
+            font-size: 0.9rem;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 900px) {
+            .game-container {
+                flex-direction: column;
+            }
+            
+            .reel {
+                width: 100px;
+                height: 100px;
+                font-size: 3rem;
+            }
+        }
+        
+        @media (max-width: 600px) {
+            .reel {
+                width: 80px;
+                height: 80px;
+                font-size: 2rem;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            .logo h1 {
+                font-size: 1.7rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-coins"></i>
+                <h1>Slotchain Casino</h1>
+            </div>
+            <div class="wallet-info">
+                <div class="balance">
+                    <i class="fas fa-wallet"></i>
+                    <span id="walletBalance">0.00 BNB</span>
+                </div>
+                <button id="connectButton" class="connect-btn">
+                    <i class="fas fa-plug"></i> Connect Wallet
+                </button>
+            </div>
+        </header>
+        
+        <div class="game-container">
+            <div class="slot-machine">
+                <h2 class="panel-title">Slot Machine</h2>
+                <div class="reels">
+                    <div class="reel">
+                        <div class="reel-content">🍒</div>
+                    </div>
+                    <div class="reel">
+                        <div class="reel-content">🍋</div>
+                    </div>
+                    <div class="reel">
+                        <div class="reel-content">🍇</div>
+                    </div>
+                </div>
+                
+                <div class="controls">
+                    <div class="bet-controls">
+                        <div class="bet-amount">
+                            <i class="fas fa-coins"></i>
+                            <span>Bet Amount:</span>
+                        </div>
+                        <input type="number" id="betAmount" class="bet-input" min="0.001" step="0.001" value="0.01">
+                        <span>BNB</span>
+                    </div>
+                    <button id="spinButton" class="spin-btn" disabled>
+                        <i class="fas fa-play"></i> SPIN
+                    </button>
+                </div>
+            </div>
+            
+            <div class="info-panel">
+                <h2 class="panel-title">Game Info</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Contract Fee:</span>
+                        <span id="contractFee" class="info-value">5%</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Contract Balance:</span>
+                        <span id="contractBalance" class="info-value">0.00 BNB</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Current RTP:</span>
+                        <span class="info-value">137.3%</span>
+                    </div>
+                </div>
+                
+                <div class="payouts">
+                    <h3 class="panel-title">Payouts</h3>
+                    <div class="payout-item">
+                        <div class="payout-combination">
+                            <div class="payout-symbol">🍒</div>
+                            <div class="payout-symbol">🍒</div>
+                            <div class="payout-symbol">🍒</div>
+                        </div>
+                        <span class="info-value">100x</span>
+                    </div>
+                    <div class="payout-item">
+                        <div class="payout-combination">
+                            <div class="payout-symbol">🍇</div>
+                            <div class="payout-symbol">🍇</div>
+                            <div class="payout-symbol">🍇</div>
+                        </div>
+                        <span class="info-value">10x</span>
+                    </div>
+                    <div class="payout-item">
+                        <div class="payout-combination">
+                            <div class="payout-symbol">🍋</div>
+                            <div class="payout-symbol">🍋</div>
+                            <div class="payout-symbol">🍋</div>
+                        </div>
+                        <span class="info-value">5x</span>
+                    </div>
+                    <div class="payout-item">
+                        <div class="payout-combination">
+                            <div class="payout-symbol">🍊</div>
+                            <div class="payout-symbol">🍊</div>
+                            <div class="payout-symbol">🍊</div>
+                        </div>
+                        <span class="info-value">2x</span>
+                    </div>
+                    <div class="payout-item">
+                        <div class="payout-combination">
+                            <div class="payout-symbol">🍉</div>
+                            <div class="payout-symbol">🍉</div>
+                            <div class="payout-symbol">🍉</div>
+                        </div>
+                        <span class="info-value">1.5x</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="results">
+            <h2 class="result-title">Recent Results</h2>
+            <div id="resultsContainer">
+                <div class="result-item win">
+                    <div>
+                        <div>0x34a1...dF2 won</div>
+                        <small>2 minutes ago</small>
+                    </div>
+                    <div class="win-amount">+0.145 BNB</div>
+                </div>
+                <div class="result-item loss">
+                    <div>
+                        <div>0x87b3...9c1 lost</div>
+                        <small>4 minutes ago</small>
+                    </div>
+                    <div class="loss-amount">-0.01 BNB</div>
+                </div>
+                <div class="result-item jackpot">
+                    <div>
+                        <div>JACKPOT! 0xf2a4...8b9 won</div>
+                        <small>10 minutes ago</small>
+                    </div>
+                    <div class="win-amount">+1.42 BNB</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Powered by Binance Smart Chain | Slotchain Contract v1.0</p>
+            <p>Always gamble responsibly. This is a demo application.</p>
+        </footer>
+    </div>
+    
+    <script>
+        // Contract configuration
+        const contractAddress = "0xYourContractAddressHere"; // Replace with actual contract address
+        const contractABI = [ /* Contract ABI would go here */ ];
+        
+        // DOM Elements
+        const connectButton = document.getElementById('connectButton');
+        const spinButton = document.getElementById('spinButton');
+        const walletBalance = document.getElementById('walletBalance');
+        const contractBalance = document.getElementById('contractBalance');
+        const contractFee = document.getElementById('contractFee');
+        const betAmountInput = document.getElementById('betAmount');
+        const resultsContainer = document.getElementById('resultsContainer');
+        const reels = document.querySelectorAll('.reel-content');
+        
+        // Web3 and contract instance
+        let web3;
+        let contract;
+        let account;
+        
+        // Symbols for display
+        const symbols = ['🍒', '🍋', '🍇', '🍊', '🍉', '🍎'];
+        
+        // Initialize Web3
+        async function initWeb3() {
+            if (window.ethereum) {
+                web3 = new Web3(window.ethereum);
+                try {
+                    // Request account access
+                    await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    await setupContract();
+                    setupEventListeners();
+                } catch (error) {
+                    console.error("User denied account access");
+                }
+            } else {
+                alert('Please install MetaMask to use this application!');
+            }
+        }
+        
+        // Set up contract instance
+        async function setupContract() {
+            // Get accounts
+            const accounts = await web3.eth.getAccounts();
+            account = accounts[0];
+            
+            // Create contract instance
+            contract = new web3.eth.Contract(contractABI, contractAddress);
+            
+            // Update UI
+            updateWalletInfo();
+            updateContractInfo();
+            
+            // Enable spin button
+            spinButton.disabled = false;
+            
+            // Update connect button
+            connectButton.innerHTML = '<i class="fas fa-check"></i> Connected';
+            connectButton.classList.add('connected');
+            
+            // Listen for events
+            contract.events.BetResult({
+                fromBlock: 'latest'
+            })
+            .on('data', event => {
+                handleBetResult(event.returnValues);
+            })
+            .on('error', console.error);
+        }
+        
+        // Update wallet information
+        async function updateWalletInfo() {
+            // Get balance
+            const balance = await web3.eth.getBalance(account);
+            const balanceBNB = web3.utils.fromWei(balance, 'ether');
+            walletBalance.textContent = parseFloat(balanceBNB).toFixed(4) + ' BNB';
+            
+            // Update bet input max based on balance
+            betAmountInput.max = parseFloat(balanceBNB).toFixed(4);
+        }
+        
+        // Update contract information
+        async function updateContractInfo() {
+            // Get contract balance
+            const balance = await web3.eth.getBalance(contractAddress);
+            const balanceBNB = web3.utils.fromWei(balance, 'ether');
+            contractBalance.textContent = parseFloat(balanceBNB).toFixed(4) + ' BNB';
+            
+            // Get fee percentage
+            const fee = await contract.methods.getFeePercent().call();
+            contractFee.textContent = fee + '%';
+        }
+        
+        // Handle bet result event
+        function handleBetResult(result) {
+            const player = result.player;
+            const amount = web3.utils.fromWei(result.amount, 'ether');
+            const payout = web3.utils.fromWei(result.payout, 'ether');
+            const fee = web3.utils.fromWei(result.fee, 'ether');
+            
+            // Add to results
+            const resultItem = document.createElement('div');
+            
+            if (parseFloat(payout) > 0) {
+                resultItem.className = 'result-item win';
+                if (parseFloat(payout) > parseFloat(amount) * 10) {
+                    resultItem.classList.add('jackpot');
+                }
+                resultItem.innerHTML = `
+                    <div>
+                        <div>${player.substring(0, 6)}...${player.substring(38)} won</div>
+                        <small>Just now</small>
+                    </div>
+                    <div class="win-amount">+${parseFloat(payout).toFixed(4)} BNB</div>
+                `;
+            } else {
+                resultItem.className = 'result-item loss';
+                resultItem.innerHTML = `
+                    <div>
+                        <div>${player.substring(0, 6)}...${player.substring(38)} lost</div>
+                        <small>Just now</small>
+                    </div>
+                    <div class="loss-amount">-${parseFloat(amount).toFixed(4)} BNB</div>
+                `;
+            }
+            
+            resultsContainer.prepend(resultItem);
+            
+            // Update balances
+            updateWalletInfo();
+            updateContractInfo();
+        }
+        
+        // Spin the slot machine
+        async function spinSlotMachine() {
+            const betAmount = betAmountInput.value;
+            if (!betAmount || parseFloat(betAmount) <= 0) {
+                alert('Please enter a valid bet amount');
+                return;
+            }
+            
+            // Disable spin button during transaction
+            spinButton.disabled = true;
+            spinButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            
+            try {
+                // Convert to wei
+                const amountWei = web3.utils.toWei(betAmount, 'ether');
+                
+                // Call contract method
+                await contract.methods.placeBet().send({
+                    from: account,
+                    value: amountWei
+                });
+                
+                // Visual spinning effect
+                spinReels();
+                
+            } catch (error) {
+                console.error("Bet failed:", error);
+                alert('Transaction failed: ' + error.message);
+                spinButton.disabled = false;
+                spinButton.innerHTML = '<i class="fas fa-play"></i> SPIN';
+            }
+        }
+        
+        // Visual spinning effect
+        function spinReels() {
+            // Reset reels
+            reels.forEach(reel => {
+                reel.innerHTML = '';
+                reel.classList.add('spinning');
+                
+                // Create multiple symbols for spinning effect
+                for (let i = 0; i < 20; i++) {
+                    const symbol = document.createElement('div');
+                    symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    symbol.style.height = '100%';
+                    symbol.style.display = 'flex';
+                    symbol.style.justifyContent = 'center';
+                    symbol.style.alignItems = 'center';
+                    reel.appendChild(symbol);
+                }
+            });
+            
+            // Stop spinning after delay
+            setTimeout(() => {
+                reels.forEach(reel => {
+                    reel.classList.remove('spinning');
+                    reel.innerHTML = symbols[Math.floor(Math.random() * symbols.length)];
+                });
+                
+                // Re-enable spin button
+                spinButton.disabled = false;
+                spinButton.innerHTML = '<i class="fas fa-play"></i> SPIN';
+            }, 2000);
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            connectButton.addEventListener('click', initWeb3);
+            spinButton.addEventListener('click', spinSlotMachine);
+        }
+        
+        // Initialize when page loads
+        window.addEventListener('load', () => {
+            // Show demo results
+            const demoResults = [
+                { player: '0x34a1...dF2', amount: '0.01', payout: '0.145', fee: '0.007', win: true },
+                { player: '0x87b3...9c1', amount: '0.01', payout: '0', fee: '0', win: false },
+                { player: '0xf2a4...8b9', amount: '0.1', payout: '1.42', fee: '0.071', win: true, jackpot: true }
+            ];
+            
+            resultsContainer.innerHTML = '';
+            
+            demoResults.forEach(result => {
+                const resultItem = document.createElement('div');
+                resultItem.className = `result-item ${result.win ? 'win' : 'loss'} ${result.jackpot ? 'jackpot' : ''}`;
+                
+                const timeAgo = result.jackpot ? '10 minutes ago' : 
+                              result.player.startsWith('0x34') ? '2 minutes ago' : '4 minutes ago';
+                
+                resultItem.innerHTML = `
+                    <div>
+                        <div>${result.player} ${result.win ? 'won' : 'lost'}</div>
+                        <small>${timeAgo}</small>
+                    </div>
+                    <div class="${result.win ? 'win-amount' : 'loss-amount'}">
+                        ${result.win ? '+' : '-'}${result.win ? result.payout : result.amount} BNB
+                    </div>
+                `;
+                
+                resultsContainer.appendChild(resultItem);
+            });
+        });
+    </script>
+</body>
+</html>
